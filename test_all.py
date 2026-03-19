@@ -7,6 +7,7 @@ import tempfile
 import shutil
 import subprocess
 import sys
+import platform
 from pathlib import Path
 import yaml
 
@@ -33,9 +34,14 @@ class TestSteamHostsUpdater(unittest.TestCase):
             [sys.executable, str(script_path), '--help'],
             capture_output=True,
             text=True,
-            timeout=30
+            timeout=30,
+            encoding='utf-8',
+            errors='replace'
         )
-        self.assertEqual(result.returncode, 0)
+        print(f"Help exit code: {result.returncode}")
+        print(f"Help stdout: {result.stdout[:200]}")
+        print(f"Help stderr: {result.stderr[:200]}")
+        self.assertEqual(result.returncode, 0, f"Exit code: {result.returncode}, stderr: {result.stderr}")
         self.assertIn('使用方法', result.stdout)
         self.assertIn('--output', result.stdout)
         self.assertIn('--log', result.stdout)
@@ -173,8 +179,13 @@ class TestParameterCombinations(unittest.TestCase):
             capture_output=True,
             text=True,
             timeout=30,
-            cwd=self.test_dir
+            cwd=self.test_dir,
+            encoding='utf-8',
+            errors='replace'
         )
+        print(f"Output file exists: {output_file.exists()}")
+        print(f"Exit code: {result.returncode}")
+        print(f"Stderr: {result.stderr}")
 
         self.assertTrue(output_file.exists())
         log_files = list(Path(self.test_dir).glob('steam_hosts_updater_*.log'))
@@ -188,8 +199,13 @@ class TestParameterCombinations(unittest.TestCase):
             capture_output=True,
             text=True,
             timeout=30,
-            cwd=self.test_dir
+            cwd=self.test_dir,
+            encoding='utf-8',
+            errors='replace'
         )
+        print(f"Exit code: {result.returncode}")
+        print(f"Config file exists: {(Path(self.test_dir) / 'config.yaml').exists()}")
+        print(f"Stderr: {result.stderr}")
 
         self.assertEqual(result.returncode, 0)
         self.assertTrue((Path(self.test_dir) / 'config.yaml').exists())
@@ -235,6 +251,13 @@ class TestLogFilenameFormat(unittest.TestCase):
 
 def run_tests():
     """运行所有测试"""
+    # 修复Windows控制台编码问题
+    if platform.system() == 'Windows':
+        import io
+        import sys
+        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+        sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
+    
     # 创建测试套件
     loader = unittest.TestLoader()
     suite = unittest.TestSuite()
