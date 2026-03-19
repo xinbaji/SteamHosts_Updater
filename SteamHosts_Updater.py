@@ -12,6 +12,7 @@ import shutil
 import sys
 from pathlib import Path
 from datetime import datetime
+from typing import cast
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -159,8 +160,9 @@ def flush_dns():
 def get_config_path():
     """获取配置文件路径，支持打包后的路径"""
     if getattr(sys, 'frozen', False):
-        # 打包后的情况，资源在临时目录
-        base_path = sys._MEIPASS
+        # 打包后的情况，资源在临时目录（PyInstaller 特有属性）
+        # 使用 getattr + default 来绕过类型检查
+        base_path = cast(str, getattr(sys, '_MEIPASS', ''))
     else:
         # 正常运行的情况
         base_path = Path(__file__).parent
