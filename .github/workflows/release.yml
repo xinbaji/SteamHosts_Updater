@@ -56,9 +56,10 @@ jobs:
 
         # 使用 PyInstaller 命令行方式打包，包含所有必需的依赖
         pyinstaller --onefile --name SteamHosts_Updater --add-data "config.yaml${SEP}." --hidden-import yaml --hidden-import yaml.scanner --hidden-import yaml.parser --hidden-import yaml.loader --hidden-import yaml.dumper --hidden-import yaml.resolver --log-level INFO SteamHosts_Updater.py
-    
+
     - name: 获取版本号
       id: get_version
+      shell: bash
       run: |
         if [[ "${{ github.event.head_commit.message }}" =~ V([0-9]+\.[0-9]+\.[0-9]+) ]]; then
           VERSION="${BASH_REMATCH[1]}"
@@ -83,6 +84,7 @@ jobs:
         fi
 
     - name: 显示构建产物
+      shell: bash
       run: |
         ls -la dist/
 
