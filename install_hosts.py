@@ -12,7 +12,9 @@ import os
 import platform
 import subprocess
 import shutil
+import re
 from pathlib import Path
+from datetime import datetime
 from typing import Optional
 import requests
 
@@ -178,19 +180,33 @@ class HostsInstaller:
         
         return str(backup_file)
     
+    def extract_timestamp(self, content: str) -> datetime:
+        """从hosts内容中提取生成时间
+
+        Args:
+            content: hosts内容
+
+        Returns:
+            生成时间，如果未找到返回datetime.min
+        """
+        match = re.search(r'# 生成时间: (\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})', content)
+        if match:
+            return datetime.strptime(match.group(1), '%Y-%m-%d %H:%M:%S')
+        return datetime.min
+
     def parse_steam_hosts(self, content: str) -> str:
         """解析Steam hosts内容
-        
+
         Args:
             content: 远程hosts文件内容
-            
+
         Returns:
             Steam hosts内容（不包含外层注释）
         """
         lines = content.split('\n')
         steam_hosts = []
         in_steam_section = False
-        
+
         for line in lines:
             # 检测开始标记
             if 'Steam Hosts - 由程序自动生成' in line:
@@ -201,45 +217,101 @@ class HostsInstaller:
             # 收集内容
             elif in_steam_section:
                 steam_hosts.append(line)
-        
+
         return '\n'.join(steam_hosts).strip()
-    
+
     def update_hosts_file(self, steam_hosts_content: str) -> None:
-        """更新本地hosts文件
-        
+        """更新本地hosts文件，只保留最新的本程序生成内容
+
         Args:
             steam_hosts_content: Steam hosts内容
         """
         hosts_file = Path(self.hosts_path)
-        
+
         try:
             # 读取现有hosts内容
             existing_content = ""
             if hosts_file.exists():
                 with open(hosts_file, 'r', encoding='utf-8') as f:
                     existing_content = f.read()
-            
-            # 移除旧的Steam hosts
+
+            # 分割为多个本程序生成的内容块
             lines = existing_content.split('\n')
-            filtered_lines = []
-            in_steam_section = False
-            
+            sections = []
+            current_section = []
+            in_section = False
+
             for line in lines:
                 if 'Steam Hosts - 由程序自动生成' in line:
-                    in_steam_section = True
+                    # 遇到新段落，保存旧段落
+                    if in_section and current_section:
+                        timestamp = self.extract_timestamp('\n'.join(current_section))
+                        sections.append({
+                            'timestamp': timestamp,
+                            'content': current_section
+                        })
+                    # 开始新段落
+                    in_section = True
+                    current_section = [line]
                 elif 'Steam Hosts结束' in line:
-                    in_steam_section = False
-                elif not in_steam_section:
-                    filtered_lines.append(line)
-            
+                    current_section.append(line)
+                    in_section = False
+                    # 保存这个段落
+                    timestamp = self.extract_timestamp('\n'.join(current_section))
+                    sections.append({
+                        'timestamp': timestamp,
+                        'content': current_section
+                    })
+                    current_section = []
+                elif not in_section:
+                    # 非本程序生成的行
+                    sections.append({
+                        'timestamp': datetime.max,  # 系统原有内容，永不删除
+                        'content': [line]
+                    })
+                else:
+                    current_section.append(line)
+
+            # 如果还在段落内（文件未正确结束）
+            if in_section and current_section:
+                timestamp = self.extract_timestamp('\n'.join(current_section))
+                sections.append({
+                    'timestamp': timestamp,
+                    'content': current_section
+                })
+
+            # 找到最新的本程序生成内容
+            new_content_timestamp = self.extract_timestamp(steam_hosts_content)
+            latest_program_section = None
+            latest_timestamp = datetime.min
+
+            for section in sections:
+                if section['timestamp'] != datetime.max:  # 排除系统原有内容
+                    if section['timestamp'] > latest_timestamp:
+                        latest_timestamp = section['timestamp']
+                        latest_program_section = section
+
+            # 过滤内容：保留系统原有内容 + 丢弃旧的本程序内容 + 添加最新内容
+            filtered_lines = []
+            for section in sections:
+                if section['timestamp'] == datetime.max:
+                    # 系统原有内容，保留
+                    filtered_lines.extend(section['content'])
+                elif latest_program_section and section == latest_program_section:
+                    # 最新的本程序内容，保留
+                    filtered_lines.extend(section['content'])
+                else:
+                    # 旧的本程序内容，丢弃
+                    self.logger.info(f"删除旧版本hosts生成内容: {section['timestamp']}")
+
             # 构建新内容
             new_content = '\n'.join(filtered_lines).strip() + '\n\n'
             new_content += steam_hosts_content + '\n'
-            
+
             # 写入新内容
             with open(hosts_file, 'w', encoding='utf-8') as f:
                 f.write(new_content)
-            
+
             self.logger.info(f"成功更新hosts文件: {self.hosts_path}")
             
         except PermissionError:

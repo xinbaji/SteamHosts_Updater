@@ -10,6 +10,7 @@ import platform
 import subprocess
 import shutil
 import sys
+import re
 from pathlib import Path
 from datetime import datetime
 from typing import cast
@@ -96,8 +97,16 @@ def backup_hosts(hosts_path):
     return str(backup_file)
 
 
+def extract_timestamp(content):
+    """从hosts内容中提取生成时间"""
+    match = re.search(r'# 生成时间: (\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})', content)
+    if match:
+        return datetime.strptime(match.group(1), '%Y-%m-%d %H:%M:%S')
+    return datetime.min
+
+
 def update_system_hosts(hosts_path, steam_hosts_content):
-    """更新系统hosts文件"""
+    """更新系统hosts文件，只保留最新的本程序生成内容"""
     hosts_file = Path(hosts_path)
     
     # 读取现有内容
@@ -106,20 +115,78 @@ def update_system_hosts(hosts_path, steam_hosts_content):
         with open(hosts_file, 'r', encoding='utf-8') as f:
             existing = f.read()
     
-    # 移除旧的Steam hosts
+    # 分割为多个本程序生成的内容块
     lines = existing.split('\n')
-    filtered = []
+    sections = []
+    current_section = []
     in_section = False
+    current_timestamp = datetime.min
+    
     for line in lines:
         if 'Steam Hosts - 由程序自动生成' in line:
+            # 遇到新段落，保存旧段落
+            if in_section and current_section:
+                timestamp = extract_timestamp('\n'.join(current_section))
+                sections.append({
+                    'timestamp': timestamp,
+                    'content': current_section
+                })
+            # 开始新段落
             in_section = True
+            current_section = [line]
         elif 'Steam Hosts结束' in line:
+            current_section.append(line)
             in_section = False
+            # 保存这个段落
+            timestamp = extract_timestamp('\n'.join(current_section))
+            sections.append({
+                'timestamp': timestamp,
+                'content': current_section
+            })
+            current_section = []
         elif not in_section:
-            filtered.append(line)
+            # 非本程序生成的行
+            sections.append({
+                'timestamp': datetime.max,  # 系统原有内容，永不删除
+                'content': [line]
+            })
+        else:
+            current_section.append(line)
+    
+    # 如果还在段落内（文件未正确结束）
+    if in_section and current_section:
+        timestamp = extract_timestamp('\n'.join(current_section))
+        sections.append({
+            'timestamp': timestamp,
+            'content': current_section
+        })
+    
+    # 找到最新的本程序生成内容
+    new_content_timestamp = extract_timestamp(steam_hosts_content)
+    latest_program_section = None
+    latest_timestamp = datetime.min
+    
+    for section in sections:
+        if section['timestamp'] != datetime.max:  # 排除系统原有内容
+            if section['timestamp'] > latest_timestamp:
+                latest_timestamp = section['timestamp']
+                latest_program_section = section
+    
+    # 过滤内容：保留系统原有内容 + 丢弃旧的本程序内容 + 添加最新内容
+    filtered_lines = []
+    for section in sections:
+        if section['timestamp'] == datetime.max:
+            # 系统原有内容，保留
+            filtered_lines.extend(section['content'])
+        elif latest_program_section and section == latest_program_section:
+            # 最新的本程序内容，保留
+            filtered_lines.extend(section['content'])
+        else:
+            # 旧的本程序内容，丢弃
+            logger.info("删除旧版本hosts生成内容: {}".format(section['timestamp']))
     
     # 添加新内容
-    new_content = '\n'.join(filtered).strip() + '\n\n' + steam_hosts_content + '\n'
+    new_content = '\n'.join(filtered_lines).strip() + '\n\n' + steam_hosts_content + '\n'
     
     with open(hosts_file, 'w', encoding='utf-8') as f:
         f.write(new_content)
