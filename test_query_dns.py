@@ -11,20 +11,12 @@ import yaml
 
 from query_dns import HostsWriter, DnsQueryError
 
-# Python 3.11+ 有 override，3.10 兼容处理
-if sys.version_info >= (3, 11):
+# Python 3.12+ 有 override，3.9-3.11 兼容处理
+if sys.version_info >= (3, 12):
     from typing import override
 else:
     def override(func):
-        """Python 3.10 兼容的 override 装饰器（无实际功能）"""
-        return func
-
-# Python 3.11+ 有 override，3.10 兼容处理
-if sys.version_info >= (3, 11):
-    from typing import override
-else:
-    def override(func):
-        """Python 3.10 兼容的 override 装饰器（无实际功能）"""
+        """Python 3.9-3.11 兼容的 override 装饰器（无实际功能）"""
         return func
 
 
