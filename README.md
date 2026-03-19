@@ -7,6 +7,7 @@
 - ✅ 通过Google DNS (8.8.8.8) 查询Steam域名IP
 - ✅ 自动生成hosts文件
 - ✅ 支持Windows、macOS、Linux三平台
+- ✅ 单文件可执行程序，无需安装依赖
 - ✅ 每日自动更新
 - ✅ 支持一键安装到系统hosts
 - ✅ 完善的错误处理和日志记录

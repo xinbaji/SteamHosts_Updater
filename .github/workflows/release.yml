@@ -44,21 +44,15 @@ jobs:
         pip install pyinstaller
         pip install -r requirements.txt
     
-    - name: 构建 query_dns 可执行文件
+    - name: 构建 SteamHosts_Updater 单文件可执行文件
       run: |
-        pyinstaller --onefile --name query_dns_${{ matrix.platform }} query_dns.py
-    
-    - name: 构建 install_hosts 可执行文件
-      run: |
-        pyinstaller --onefile --name install_hosts_${{ matrix.platform }} install_hosts.py
+        pyinstaller --onefile --name ${{ matrix.binary_name }} SteamHosts_Updater.py
     
     - name: 上传构建产物
       uses: actions/upload-artifact@v6
       with:
         name: ${{ matrix.platform }}-binaries
-        path: |
-          dist/query_dns_${{ matrix.platform }}*
-          dist/install_hosts_${{ matrix.platform }}*
+        path: dist/${{ matrix.binary_name }}*
     
   release:
     name: 创建Release
@@ -104,14 +98,33 @@ jobs:
           - **Ubuntu/Linux**: 下载 `steam_hosts_updater_ubuntu`
           
           ### 使用方法
-          1. 查询并生成hosts文件：
-             - Windows: `query_dns_windows.exe`
-             - macOS: `./query_dns_macos`
-             - Linux: `./query_dns_ubuntu`
           
-          2. 安装hosts到系统：
-             - Windows (需要管理员权限): 右键"以管理员身份运行" `install_hosts_windows.exe`
-             - macOS/Linux: `sudo ./install_hosts_macos` 或 `sudo ./install_hosts_ubuntu`
+          1. 仅生成hosts文件：
+             ```bash
+             # Windows
+             steam_hosts_updater_windows.exe
+             
+             # macOS/Linux
+             ./steam_hosts_updater_macos
+             # 或
+             ./steam_hosts_updater_ubuntu
+             ```
+          
+          2. 生成并安装到系统hosts（需要管理员/root权限）：
+             ```bash
+             # Windows（右键"以管理员身份运行"）
+             steam_hosts_updater_windows.exe --install
+             # 或
+             steam_hosts_updater_windows.exe -i
+             
+             # macOS/Linux
+             sudo ./steam_hosts_updater_macos --install
+             # 或
+             sudo ./steam_hosts_updater_ubuntu --install
+             ```
+          
+          ### 配置
+          程序会自动读取同目录下的 `config.yaml` 配置文件（如果存在），否则使用默认配置。
           
           ### 变更内容
           请查看 [提交历史](${{ github.repository }}/commits/main) 了解详细变更。

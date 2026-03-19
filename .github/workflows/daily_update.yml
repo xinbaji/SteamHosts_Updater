@@ -32,7 +32,7 @@ jobs:
     
     - name: 运行查询脚本
       run: |
-        python query_dns.py
+        python SteamHosts_Updater.py
     
     - name: 验证hosts文件
       run: |
@@ -67,38 +67,63 @@ jobs:
         自动更新Steam相关域名的hosts文件，加速Steam访问。
         
         ## 功能特性
-        
+
         - ✅ 通过Google DNS (8.8.8.8) 查询Steam域名IP
         - ✅ 自动生成hosts文件
         - ✅ 支持Windows、macOS、Linux三平台
+        - ✅ 单文件可执行程序，无需安装依赖
         - ✅ 每日自动更新
         - ✅ 支持一键安装到系统hosts
         - ✅ 完善的错误处理和日志记录
-        
+
         ## 快速开始
-        
+
         ### 方法1: 使用可执行文件（推荐）
-        
+
         下载最新Release中的可执行文件：
-        - Windows: `query_dns_windows.exe`, `install_hosts_windows.exe`
-        - macOS: `query_dns_macos`, `install_hosts_macos`
-        - Linux: `query_dns_ubuntu`, `install_hosts_ubuntu`
-        
+        - Windows: `steam_hosts_updater_windows.exe`
+        - macOS: `steam_hosts_updater_macos`
+        - Linux: `steam_hosts_updater_ubuntu`
+
         **步骤：**
-        1. 运行查询脚本生成hosts文件
-        2. 以管理员权限运行安装脚本
-        
+
+        1. 仅生成hosts文件：
+           ```bash
+           # Windows
+           steam_hosts_updater_windows.exe
+
+           # macOS/Linux
+           ./steam_hosts_updater_macos
+           # 或
+           ./steam_hosts_updater_ubuntu
+           ```
+
+        2. 生成并安装到系统hosts（需要管理员/root权限）：
+           ```bash
+           # Windows（右键"以管理员身份运行"）
+           steam_hosts_updater_windows.exe --install
+           # 或
+           steam_hosts_updater_windows.exe -i
+
+           # macOS/Linux
+           sudo ./steam_hosts_updater_macos --install
+           # 或
+           sudo ./steam_hosts_updater_ubuntu --install
+           ```
+
         ### 方法2: 使用Python脚本
-        
+
         ```bash
         # 安装依赖
         pip install -r requirements.txt
-        
-        # 查询并生成hosts文件
-        python query_dns.py
-        
-        # 安装到系统hosts（需要管理员/root权限）
-        python install_hosts.py
+
+        # 仅生成hosts文件
+        python SteamHosts_Updater.py
+
+        # 生成并安装到系统hosts（需要管理员/root权限）
+        python SteamHosts_Updater.py --install
+        # 或
+        python SteamHosts_Updater.py -i
         ```
         
         ## 配置说明
@@ -130,8 +155,9 @@ jobs:
         ```
         .
         ├── config.yaml              # 配置文件
-        ├── query_dns.py             # DNS查询脚本
-        ├── install_hosts.py         # 安装脚本
+        ├── SteamHosts_Updater.py    # 单文件完整功能脚本（推荐）
+        ├── query_dns.py             # DNS查询脚本（独立）
+        ├── install_hosts.py         # 安装脚本（独立）
         ├── test_query_dns.py        # 测试脚本
         ├── requirements.txt         # Python依赖
         ├── .github/
