@@ -15,6 +15,18 @@ from pathlib import Path
 from datetime import datetime
 from typing import cast
 
+
+def safe_print(msg):
+    """安全打印,处理Windows编码问题"""
+    if platform.system() == 'Windows':
+        try:
+            print(msg)
+        except UnicodeEncodeError:
+            # Windows控制台编码问题,使用UTF-8并忽略错误
+            print(msg.encode('utf-8', errors='ignore').decode('utf-8', errors='ignore'))
+    else:
+        print(msg)
+
 def setup_logging(log_to_file=False):
     """设置日志系统
 
@@ -39,7 +51,7 @@ def setup_logging(log_to_file=False):
                 logging.StreamHandler()
             ]
         )
-        print("日志文件: {}".format(log_file))
+        safe_print("日志文件: {}".format(log_file))
     else:
         # 默认只输出到控制台
         logging.basicConfig(
@@ -431,20 +443,20 @@ def main():
 
     try:
         if show_help:
-            print("\n使用方法:")
-            print("  SteamHosts_Updater.exe                    # 直接安装到系统（默认）")
-            print("  SteamHosts_Updater.exe -o [filename]       # 只生成hosts文件，不安装")
-            print("  SteamHosts_Updater.exe --output hosts.txt  # 只生成hosts文件，不安装")
-            print("  SteamHosts_Updater.exe --log               # 生成日志文件")
-            print("  SteamHosts_Updater.exe --init-config       # 生成默认配置文件")
-            print("  SteamHosts_Updater.exe --help              # 显示帮助信息")
-            print("")
-            print("说明:")
-            print("  - 默认行为：查询DNS并直接安装到系统hosts文件")
-            print("  - --output/-o：只生成hosts文件到当前目录")
-            print("  - --log/-l：同时将日志输出到文件（文件名精确到秒）")
-            print("  - --init-config：生成config.yaml配置文件供高级用户自定义")
-            print("  - 配置文件：如存在同级目录的config.yaml则加载，否则使用内置默认配置")
+            safe_print("\n使用方法:")
+            safe_print("  SteamHosts_Updater.exe                    # 直接安装到系统（默认）")
+            safe_print("  SteamHosts_Updater.exe -o [filename]       # 只生成hosts文件，不安装")
+            safe_print("  SteamHosts_Updater.exe --output hosts.txt  # 只生成hosts文件，不安装")
+            safe_print("  SteamHosts_Updater.exe --log               # 生成日志文件")
+            safe_print("  SteamHosts_Updater.exe --init-config       # 生成默认配置文件")
+            safe_print("  SteamHosts_Updater.exe --help              # 显示帮助信息")
+            safe_print("")
+            safe_print("说明:")
+            safe_print("  - 默认行为：查询DNS并直接安装到系统hosts文件")
+            safe_print("  - --output/-o：只生成hosts文件到当前目录")
+            safe_print("  - --log/-l：同时将日志输出到文件（文件名精确到秒）")
+            safe_print("  - --init-config：生成config.yaml配置文件供高级用户自定义")
+            safe_print("  - 配置文件：如存在同级目录的config.yaml则加载，否则使用内置默认配置")
             return 0
 
         if init_config_requested:
@@ -458,7 +470,7 @@ def main():
             update(install=True)
 
     except Exception as e:
-        print("\n[错误] {}".format(e))
+        safe_print("\n[错误] {}".format(e))
         return 1
 
     return 0
