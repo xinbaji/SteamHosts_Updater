@@ -3,7 +3,6 @@ name: Release
 on:
   push:
     branches: [ main ]
-    # 当commit消息以V开头时触发
   pull_request:
     branches: [ main ]
 
@@ -13,6 +12,8 @@ permissions:
 jobs:
   build:
     name: 构建打包
+    # 只在commit消息以V/v开头时才构建
+    if: startsWith(github.event.head_commit.message, 'V') || startsWith(github.event.head_commit.message, 'v')
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -21,14 +22,17 @@ jobs:
             python-version: '3.10'
             platform: ubuntu
             binary_name: steam_hosts_updater_ubuntu
+            extension: ''
           - os: macos-latest
             python-version: '3.10'
             platform: mac
             binary_name: steam_hosts_updater_macos
+            extension: ''
           - os: windows-latest
             python-version: '3.10'
             platform: windows
-            binary_name: steam_hosts_updater_windows.exe
+            binary_name: steam_hosts_updater_windows
+            extension: '.exe'
     
     steps:
     - uses: actions/checkout@v6
@@ -77,10 +81,11 @@ jobs:
         VERSION="${VERSION#v}"
 
         # 重命名文件
+        EXTENSION="${{ matrix.extension }}"
         if [ "${{ matrix.os }}" = "windows-latest" ]; then
-          mv dist/SteamHosts_Updater.exe "dist/SteamHosts_Updater_standalone_${{ matrix.platform }}_${VERSION}.exe"
+          mv dist/SteamHosts_Updater.exe "dist/SteamHosts_Updater_standalone_${{ matrix.platform }}_${VERSION}${EXTENSION}"
         else
-          mv dist/SteamHosts_Updater "dist/SteamHosts_Updater_standalone_${{ matrix.platform }}_${VERSION}"
+          mv dist/SteamHosts_Updater "dist/SteamHosts_Updater_standalone_${{ matrix.platform }}_${VERSION}${EXTENSION}"
         fi
 
     - name: 显示构建产物
@@ -98,7 +103,6 @@ jobs:
     name: 创建Release
     needs: build
     runs-on: ubuntu-latest
-    if: startsWith(github.event.head_commit.message, 'V') || startsWith(github.event.head_commit.message, 'v')
     
     steps:
     - uses: actions/checkout@v6
@@ -143,7 +147,7 @@ jobs:
           1. 直接安装到系统（默认）：
              ```bash
              # Windows（需要管理员权限）
-             SteamHosts_Updater_standalone_windows_X.X.X.exe
+             ./SteamHosts_Updater_standalone_windows_X.X.X.exe
 
              # macOS/Linux（需要root权限）
              sudo ./SteamHosts_Updater_standalone_ubuntu_X.X.X
@@ -152,7 +156,7 @@ jobs:
           2. 只生成hosts文件：
              ```bash
              # Windows
-             SteamHosts_Updater_standalone_windows_X.X.X.exe -o
+             ./SteamHosts_Updater_standalone_windows_X.X.X.exe -o
 
              # macOS/Linux
              ./SteamHosts_Updater_standalone_ubuntu_X.X.X -o
@@ -161,7 +165,7 @@ jobs:
           3. 生成日志文件：
              ```bash
              # Windows
-             SteamHosts_Updater_standalone_windows_X.X.X.exe --log
+             ./SteamHosts_Updater_standalone_windows_X.X.X.exe --log
 
              # macOS/Linux
              ./SteamHosts_Updater_standalone_ubuntu_X.X.X --log
@@ -169,7 +173,7 @@ jobs:
 
           4. 生成配置文件：
              ```bash
-             SteamHosts_Updater_standalone_windows_X.X.X.exe --init-config
+             ./SteamHosts_Updater_standalone_windows_X.X.X.exe --init-config
              ```
 
           ### 配置
