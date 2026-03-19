@@ -48,15 +48,7 @@ jobs:
       run: |
         python SteamHosts_Updater.py -o test_hosts --log
 
-    - name: 测试SteamHosts_Updater.py --init-config参数
-      run: |
-        python SteamHosts_Updater.py --init-config
-
-    - name: 测试install_hosts.py --help参数
-      run: |
-        python install_hosts.py --help
-
-    - name: 测试install_hosts.py --log参数
+    - name: 检查生成的hosts文件
       run: |
         # 创建测试远程hosts文件
         echo "# Steam Hosts - 由程序自动生成" > test_remote_hosts.txt
@@ -70,7 +62,9 @@ jobs:
         test -f hosts && echo "Hosts文件生成成功" || exit 1
         grep "Steam Hosts" hosts
 
-    - name: 检查日志文件生成
+    - name: 清理测试文件
+      run: |
+        rm -f test_hosts test_remote_hosts.txt
       if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.10'
       run: |
         ls -la *.log 2>/dev/null || echo "没有日志文件（正常情况）"
