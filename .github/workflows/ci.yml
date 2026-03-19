@@ -49,30 +49,20 @@ jobs:
         python SteamHosts_Updater.py -o test_hosts --log
 
     - name: 检查生成的hosts文件
-      run: |
-        # 创建测试远程hosts文件
-        echo "# Steam Hosts - 由程序自动生成" > test_remote_hosts.txt
-        echo "192.168.1.1	example.com" >> test_remote_hosts.txt
-        echo "# Steam Hosts结束" >> test_remote_hosts.txt
-        python install_hosts.py test_remote_hosts.txt --log || true  # 预期可能失败（没有管理员权限）
-
-    - name: 检查生成的hosts文件
       if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.10'
       run: |
         test -f hosts && echo "Hosts文件生成成功" || exit 1
         grep "Steam Hosts" hosts
 
     - name: 清理测试文件
-      run: |
-        rm -f test_hosts test_remote_hosts.txt
       if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.10'
       run: |
-        ls -la *.log 2>/dev/null || echo "没有日志文件（正常情况）"
-        test -f steam_hosts_updater_*.log && echo "SteamHosts_Updater日志生成成功" || true
+        rm -f test_hosts test_remote_hosts.txt
 
     - name: 验证日志文件名格式
       if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.10'
       run: |
+        ls -la *.log 2>/dev/null || echo "没有日志文件（正常情况）"
         for log_file in *.log; do
           if [[ "$log_file" =~ ^steam_hosts_updater_[0-9]{8}_[0-9]{6}\.log$ ]]; then
             echo "✓ 日志文件名格式正确: $log_file"
