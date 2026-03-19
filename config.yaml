@@ -1,0 +1,28 @@
+# Steam相关域名配置
+steam_domains:
+  - store.steampowered.com
+  - steamcommunity.com
+  - api.steampowered.com
+  - steamuserimages-a.akamaihd.net
+  - steamcdn-a.akamaihd.net
+  - steamcommunity-a.akamaihd.net
+  - steamstore-a.akamaihd.net
+  - steambroadcast.akamaized.net
+  - steamvideo-a.akamaihd.net
+  - help.steampowered.com
+  - support.steampowered.com
+
+# DNS服务器配置
+dns:
+  server: 8.8.8.8
+  timeout: 5
+
+# 输出文件配置
+output:
+  hosts_file: hosts
+  backup_file: hosts.backup
+
+# 日志配置
+logging:
+  level: INFO
+  format: '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
