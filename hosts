@@ -1,19 +1,20 @@
 # ============================================
 # Steam Hosts - 由程序自动生成
-# 生成时间: 2026-03-19 20:10:07
+# 生成时间: 2026-03-19 12:25:08
 # DNS服务器: 8.8.8.8
 # ============================================
-23.62.177.63	store.steampowered.com
-23.32.110.22	steamcommunity.com
-23.32.110.22	api.steampowered.com
-23.49.104.174	steamuserimages-a.akamaihd.net
-23.62.54.4	steamcdn-a.akamaihd.net
-23.49.104.175	steamcommunity-a.akamaihd.net
-23.214.168.78	steamstore-a.akamaihd.net
-184.27.195.180	steambroadcast.akamaized.net
-23.200.230.67	steamvideo-a.akamaihd.net
-23.32.110.22	help.steampowered.com
+184.31.113.220	store.steampowered.com
+23.60.136.72	steamcommunity.com
+23.60.136.72	api.steampowered.com
+104.88.206.78	steamuserimages-a.akamaihd.net
+23.54.76.12	steamcdn-a.akamaihd.net
+104.88.206.72	steamcommunity-a.akamaihd.net
+104.88.206.76	steamstore-a.akamaihd.net
+23.38.125.16	steambroadcast.akamaized.net
+184.25.123.171	steamvideo-a.akamaihd.net
+23.60.136.72	help.steampowered.com
 172.234.232.226	support.steampowered.com
+23.2.95.19	steamgames.com
 # ============================================
 # Steam Hosts结束
 # ============================================

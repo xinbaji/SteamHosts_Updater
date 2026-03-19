@@ -48,9 +48,24 @@ python install_hosts.py
 
 ## 当前Hosts内容
 
-**最后更新时间:** 2026-03-19
+**最后更新时间:** 2026-03-19 12:25:08
 
-完整内容请查看 [hosts](hosts) 文件
+```hosts
+184.31.113.220	store.steampowered.com
+23.60.136.72	steamcommunity.com
+23.60.136.72	api.steampowered.com
+104.88.206.78	steamuserimages-a.akamaihd.net
+23.54.76.12	steamcdn-a.akamaihd.net
+104.88.206.72	steamcommunity-a.akamaihd.net
+104.88.206.76	steamstore-a.akamaihd.net
+23.38.125.16	steambroadcast.akamaized.net
+184.25.123.171	steamvideo-a.akamaihd.net
+23.60.136.72	help.steampowered.com
+172.234.232.226	support.steampowered.com
+23.2.95.19	steamgames.com
+```
+
+*完整内容请查看 [hosts](hosts) 文件*
 
 ## 工作流程
 
@@ -94,3 +109,4 @@ python install_hosts.py
 ## 许可证
 
 MIT License
+
