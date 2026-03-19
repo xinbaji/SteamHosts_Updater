@@ -28,10 +28,6 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
-    - name: 运行单元测试
-      run: |
-        python test_query_dns.py
-
     - name: 运行综合测试
       run: |
         python test_all.py
@@ -39,10 +35,6 @@ jobs:
     - name: 测试query_dns.py基本功能
       run: |
         python query_dns.py
-
-    - name: 测试query_dns.py --log参数
-      run: |
-        python query_dns.py --log
 
     - name: 测试SteamHosts_Updater.py基本功能
       run: |

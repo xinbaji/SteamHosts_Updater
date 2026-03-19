@@ -113,7 +113,8 @@ jobs:
     - name: 获取版本号
       id: get_version
       run: |
-        if [[ "${{ github.event.head_commit.message }}" =~ V([0-9]+\.[0-9]+\.[0-9]+) ]]; then
+        COMMIT_MSG=$(git log -1 --pretty=%B)
+        if [[ "$COMMIT_MSG" =~ V([0-9]+\.[0-9]+\.[0-9]+) ]]; then
           VERSION="${BASH_REMATCH[1]}"
         else
           VERSION="v$(date +%Y.%m.%d)"
