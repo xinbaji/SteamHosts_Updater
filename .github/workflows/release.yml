@@ -46,7 +46,25 @@ jobs:
     
     - name: 构建 SteamHosts_Updater 单文件可执行文件
       run: |
-        pyinstaller --onefile --name ${{ matrix.binary_name }} SteamHosts_Updater.py
+        # 使用 PyInstaller 命令行方式打包，包含所有必需的依赖
+        pyinstaller --onefile \
+          --name steam_hosts_updater \
+          --add-data "config.yaml${{ matrix.os == 'windows-latest' && ';' || ':' }}." \
+          --hidden-import yaml \
+          --hidden-import yaml.scanner \
+          --hidden-import yaml.parser \
+          --hidden-import yaml.loader \
+          --hidden-import yaml.dumper \
+          --hidden-import yaml.resolver \
+          --log-level INFO \
+          SteamHosts_Updater.py
+
+        # 重命名输出文件
+        if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+          mv dist/steam_hosts_updater.exe "dist/${{ matrix.binary_name }}"
+        else
+          mv dist/steam_hosts_updater "dist/${{ matrix.binary_name }}"
+        fi
     
     - name: 上传构建产物
       uses: actions/upload-artifact@v6

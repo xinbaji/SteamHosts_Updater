@@ -9,6 +9,7 @@ import os
 import platform
 import subprocess
 import shutil
+import sys
 from pathlib import Path
 from datetime import datetime
 
@@ -155,6 +156,24 @@ def flush_dns():
             logger.warning("DNS刷新失败")
 
 
+def get_config_path():
+    """获取配置文件路径，支持打包后的路径"""
+    if getattr(sys, 'frozen', False):
+        # 打包后的情况，资源在临时目录
+        base_path = sys._MEIPASS
+    else:
+        # 正常运行的情况
+        base_path = Path(__file__).parent
+
+    config_path = Path(base_path) / 'config.yaml'
+
+    # 如果打包后没有配置文件，检查工作目录
+    if getattr(sys, 'frozen', False) and not config_path.exists():
+        config_path = Path.cwd() / 'config.yaml'
+
+    return str(config_path)
+
+
 def update(install=False):
     """执行更新流程"""
     logger.info("=" * 50)
@@ -162,11 +181,13 @@ def update(install=False):
     logger.info("=" * 50)
 
     # 加载配置
-    config_path = 'config.yaml'
+    config_path = get_config_path()
     if Path(config_path).exists():
         with open(config_path, 'r', encoding='utf-8') as f:
             config = yaml.safe_load(f)
+        logger.info("加载配置文件: {}".format(config_path))
     else:
+        logger.info("未找到配置文件，使用默认配置")
         # 默认配置
         config = {
             'steam_domains': [
@@ -227,9 +248,9 @@ def update(install=False):
 def main():
     """主函数"""
     import sys
-    
+
     install = '--install' in sys.argv or '-i' in sys.argv
-    
+
     try:
         if install:
             update(install=True)
@@ -243,9 +264,9 @@ def main():
     except Exception as e:
         print("\n[错误] {}".format(e))
         return 1
-    
+
     return 0
 
 
 if __name__ == '__main__':
-    exit(main())
+    sys.exit(main())
