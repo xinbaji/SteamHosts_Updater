@@ -16,6 +16,10 @@ steam_domains:
   - steamcontent.com
   - steamstatic.com
   - akamaihd.net
+  - store.akamai.steamstatic.com
+  - cdn.akamai.steamstatic.com
+  - steam-chat.com
+  - community.akamai.steamstatic.com
 
 # DNS服务器配置
 dns:

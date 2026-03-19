@@ -32,7 +32,7 @@ jobs:
     
     - name: 运行查询脚本
       run: |
-        python SteamHosts_Updater.py
+        python query_dns.py
     
     - name: 验证hosts文件
       run: |

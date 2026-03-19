@@ -55,20 +55,42 @@ jobs:
         fi
 
         # 使用 PyInstaller 命令行方式打包，包含所有必需的依赖
-        pyinstaller --onefile --name steam_hosts_updater --add-data "config.yaml${SEP}." --hidden-import yaml --hidden-import yaml.scanner --hidden-import yaml.parser --hidden-import yaml.loader --hidden-import yaml.dumper --hidden-import yaml.resolver --log-level INFO SteamHosts_Updater.py
-
-        # 重命名输出文件
-        if [ "${{ matrix.os }}" = "windows-latest" ]; then
-          mv dist/steam_hosts_updater.exe "dist/${{ matrix.binary_name }}"
-        else
-          mv dist/steam_hosts_updater "dist/${{ matrix.binary_name }}"
-        fi
+        pyinstaller --onefile --name SteamHosts_Updater --add-data "config.yaml${SEP}." --hidden-import yaml --hidden-import yaml.scanner --hidden-import yaml.parser --hidden-import yaml.loader --hidden-import yaml.dumper --hidden-import yaml.resolver --log-level INFO SteamHosts_Updater.py
     
+    - name: 获取版本号
+      id: get_version
+      run: |
+        if [[ "${{ github.event.head_commit.message }}" =~ V([0-9]+\.[0-9]+\.[0-9]+) ]]; then
+          VERSION="${BASH_REMATCH[1]}"
+        else
+          VERSION="v$(date +%Y.%m.%d)"
+        fi
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        echo "Release版本: $VERSION"
+
+    - name: 重命名输出文件
+      shell: bash
+      run: |
+        # 移除版本号中的 'v' 前缀（如果有）
+        VERSION="${{ steps.get_version.outputs.version }}"
+        VERSION="${VERSION#v}"
+
+        # 重命名文件
+        if [ "${{ matrix.os }}" = "windows-latest" ]; then
+          mv dist/SteamHosts_Updater.exe "dist/SteamHosts_Updater_standalone_${{ matrix.platform }}_${VERSION}.exe"
+        else
+          mv dist/SteamHosts_Updater "dist/SteamHosts_Updater_standalone_${{ matrix.platform }}_${VERSION}"
+        fi
+
+    - name: 显示构建产物
+      run: |
+        ls -la dist/
+
     - name: 上传构建产物
       uses: actions/upload-artifact@v6
       with:
         name: ${{ matrix.platform }}-binaries
-        path: dist/${{ matrix.binary_name }}*
+        path: dist/SteamHosts_Updater_standalone_${{ matrix.platform }}_*
     
   release:
     name: 创建Release
@@ -98,7 +120,7 @@ jobs:
         fi
         echo "version=$VERSION" >> $GITHUB_OUTPUT
         echo "Release版本: $VERSION"
-    
+
     - name: 创建Release
       uses: softprops/action-gh-release@v2
       with:
@@ -106,42 +128,50 @@ jobs:
         name: Steam Hosts Updater ${{ steps.get_version.outputs.version }}
         body: |
           ## Steam Hosts Updater ${{ steps.get_version.outputs.version }}
-          
+
           ### 下载说明
           根据你的操作系统下载对应的可执行文件：
-          - **Windows**: 下载 `steam_hosts_updater_windows.exe`
-          - **macOS**: 下载 `steam_hosts_updater_macos`
-          - **Ubuntu/Linux**: 下载 `steam_hosts_updater_ubuntu`
-          
+          - **Windows**: 下载 `SteamHosts_Updater_standalone_windows_${{ steps.get_version.outputs.version }}.exe`
+          - **macOS**: 下载 `SteamHosts_Updater_standalone_mac_${{ steps.get_version.outputs.version }}`
+          - **Ubuntu/Linux**: 下载 `SteamHosts_Updater_standalone_ubuntu_${{ steps.get_version.outputs.version }}`
+
           ### 使用方法
-          
-          1. 仅生成hosts文件：
+
+          1. 直接安装到系统（默认）：
+             ```bash
+             # Windows（需要管理员权限）
+             SteamHosts_Updater_standalone_windows_X.X.X.exe
+
+             # macOS/Linux（需要root权限）
+             sudo ./SteamHosts_Updater_standalone_ubuntu_X.X.X
+             ```
+
+          2. 只生成hosts文件：
              ```bash
              # Windows
-             steam_hosts_updater_windows.exe
-             
+             SteamHosts_Updater_standalone_windows_X.X.X.exe -o
+
              # macOS/Linux
-             ./steam_hosts_updater_macos
-             # 或
-             ./steam_hosts_updater_ubuntu
+             ./SteamHosts_Updater_standalone_ubuntu_X.X.X -o
              ```
-          
-          2. 生成并安装到系统hosts（需要管理员/root权限）：
+
+          3. 生成日志文件：
              ```bash
-             # Windows（右键"以管理员身份运行"）
-             steam_hosts_updater_windows.exe --install
-             # 或
-             steam_hosts_updater_windows.exe -i
-             
+             # Windows
+             SteamHosts_Updater_standalone_windows_X.X.X.exe --log
+
              # macOS/Linux
-             sudo ./steam_hosts_updater_macos --install
-             # 或
-             sudo ./steam_hosts_updater_ubuntu --install
+             ./SteamHosts_Updater_standalone_ubuntu_X.X.X --log
              ```
-          
+
+          4. 生成配置文件：
+             ```bash
+             SteamHosts_Updater_standalone_windows_X.X.X.exe --init-config
+             ```
+
           ### 配置
-          程序会自动读取同目录下的 `config.yaml` 配置文件（如果存在），否则使用默认配置。
-          
+          程序会自动读取同目录下的 `config.yaml` 配置文件（如果存在），否则使用内置默认配置。
+
           ### 变更内容
           请查看 [提交历史](${{ github.repository }}/commits/main) 了解详细变更。
         files: |

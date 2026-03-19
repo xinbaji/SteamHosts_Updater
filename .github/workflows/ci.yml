@@ -14,30 +14,83 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
         python-version: ['3.9', '3.10', '3.11']
-    
+
     steps:
     - uses: actions/checkout@v6
-    
+
     - name: 设置Python ${{ matrix.python-version }}
       uses: actions/setup-python@v6
       with:
         python-version: ${{ matrix.python-version }}
-    
+
     - name: 安装依赖
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-    
-    - name: 运行测试
+
+    - name: 运行单元测试
       run: |
         python test_query_dns.py
-    
-    - name: 测试查询脚本
+
+    - name: 运行综合测试
+      run: |
+        python test_all.py
+
+    - name: 测试query_dns.py基本功能
       run: |
         python query_dns.py
-    
+
+    - name: 测试query_dns.py --log参数
+      run: |
+        python query_dns.py --log
+
+    - name: 测试SteamHosts_Updater.py基本功能
+      run: |
+        python SteamHosts_Updater.py --help
+
+    - name: 测试SteamHosts_Updater.py --output参数
+      run: |
+        python SteamHosts_Updater.py -o test_hosts
+
+    - name: 测试SteamHosts_Updater.py --log参数
+      run: |
+        python SteamHosts_Updater.py -o test_hosts --log
+
+    - name: 测试SteamHosts_Updater.py --init-config参数
+      run: |
+        python SteamHosts_Updater.py --init-config
+
+    - name: 测试install_hosts.py --help参数
+      run: |
+        python install_hosts.py --help
+
+    - name: 测试install_hosts.py --log参数
+      run: |
+        # 创建测试远程hosts文件
+        echo "# Steam Hosts - 由程序自动生成" > test_remote_hosts.txt
+        echo "192.168.1.1	example.com" >> test_remote_hosts.txt
+        echo "# Steam Hosts结束" >> test_remote_hosts.txt
+        python install_hosts.py test_remote_hosts.txt --log || true  # 预期可能失败（没有管理员权限）
+
     - name: 检查生成的hosts文件
       if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.10'
       run: |
         test -f hosts && echo "Hosts文件生成成功" || exit 1
         grep "Steam Hosts" hosts
+
+    - name: 检查日志文件生成
+      if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.10'
+      run: |
+        ls -la *.log 2>/dev/null || echo "没有日志文件（正常情况）"
+        test -f steam_hosts_updater_*.log && echo "SteamHosts_Updater日志生成成功" || true
+
+    - name: 验证日志文件名格式
+      if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.10'
+      run: |
+        for log_file in *.log; do
+          if [[ "$log_file" =~ ^steam_hosts_updater_[0-9]{8}_[0-9]{6}\.log$ ]]; then
+            echo "✓ 日志文件名格式正确: $log_file"
+          else
+            echo "✗ 日志文件名格式错误: $log_file"
+          fi
+        done
