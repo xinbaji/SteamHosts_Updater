@@ -20,12 +20,35 @@ def safe_print(msg):
     """安全打印,处理Windows编码问题"""
     if platform.system() == 'Windows':
         try:
+            # 重新配置stdout为UTF-8
+            if hasattr(sys.stdout, 'buffer'):
+                stdout = cast('Any', sys.stdout)
+                stdout.reconfigure(encoding='utf-8', errors='replace')
             print(msg)
-        except UnicodeEncodeError:
-            # Windows控制台编码问题,使用UTF-8并忽略错误
-            print(msg.encode('utf-8', errors='ignore').decode('utf-8', errors='ignore'))
+        except (AttributeError, UnicodeEncodeError):
+            # Windows控制台编码问题,使用二进制写入
+            try:
+                if hasattr(sys.stdout, 'buffer'):
+                    sys.stdout.buffer.write(msg.encode('utf-8', errors='replace') + b'\n')
+                else:
+                    print(msg.encode('ascii', errors='replace').decode('ascii'))
+            except:
+                pass
     else:
         print(msg)
+
+
+# Windows平台提前配置stdout编码
+if platform.system() == 'Windows':
+    if hasattr(sys.stdout, 'buffer'):
+        try:
+            stdout = cast('Any', sys.stdout)
+            stderr = cast('Any', sys.stderr)
+            stdout.reconfigure(encoding='utf-8', errors='replace')
+            stderr.reconfigure(encoding='utf-8', errors='replace')
+        except:
+            pass
+
 
 def setup_logging(log_to_file=False):
     """设置日志系统
