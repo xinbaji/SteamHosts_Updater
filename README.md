@@ -17,7 +17,7 @@
 
 ### 使用可执行文件（推荐）
 
-下载最新Release中的可执行文件（文件名格式：`SteamHosts_Updater_standalone_{系统名}_{版本号}`）并直接运行：
+下载最新Release中的可执行文件并直接运行（当前版本：0.9.0）：
 
 ```bash
 # Windows
