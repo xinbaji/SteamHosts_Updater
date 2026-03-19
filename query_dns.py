@@ -11,7 +11,7 @@ import socket
 import yaml
 from pathlib import Path
 from datetime import datetime
-from typing import Any
+from typing import Any, Optional
 
 
 class DnsQueryError(Exception):
@@ -33,7 +33,7 @@ class HostsWriter:
         self.logger = logging.getLogger(__name__)
         self.config = config
     
-    def _load_config(self, config_path: str, logger: logging.Logger | None) -> dict[str, Any]:
+    def _load_config(self, config_path: str, logger: Optional[logging.Logger]) -> dict[str, Any]:
         """加载配置文件
         
         Args:
@@ -130,7 +130,7 @@ class HostsWriter:
                 f"请联系技术支持并提供完整日志"
             )
     
-    def query_all_domains(self) -> list[str]:
+    def query_all_domains(self) :
         """查询所有域名的IP地址
         
         Returns:
@@ -153,7 +153,7 @@ class HostsWriter:
         self.logger.info(f"成功查询 {len(hosts_entries)}/{len(domains)} 个域名")
         return hosts_entries
     
-    def write_hosts_file(self, hosts_entries: list[str]) -> None:
+    def write_hosts_file(self, hosts_entries) -> None:
         """将查询结果写入hosts文件
         
         Args:

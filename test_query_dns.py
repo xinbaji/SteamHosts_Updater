@@ -6,10 +6,26 @@ import unittest
 import tempfile
 import shutil
 from pathlib import Path
-from typing import override
+import sys
 import yaml
 
 from query_dns import HostsWriter, DnsQueryError
+
+# Python 3.11+ 有 override，3.10 兼容处理
+if sys.version_info >= (3, 11):
+    from typing import override
+else:
+    def override(func):
+        """Python 3.10 兼容的 override 装饰器（无实际功能）"""
+        return func
+
+# Python 3.11+ 有 override，3.10 兼容处理
+if sys.version_info >= (3, 11):
+    from typing import override
+else:
+    def override(func):
+        """Python 3.10 兼容的 override 装饰器（无实际功能）"""
+        return func
 
 
 class TestHostsWriter(unittest.TestCase):
@@ -19,7 +35,7 @@ class TestHostsWriter(unittest.TestCase):
     test_dir: str
     test_config_path: Path
     test_hosts_path: Path
-    test_config: dict[str, object]
+    test_config: object  # 使用 object 避免泛型参数要求
     
     @override
     def __init__(self, methodName: str = "runTest") -> None:

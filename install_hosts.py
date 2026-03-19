@@ -13,6 +13,7 @@ import platform
 import subprocess
 import shutil
 from pathlib import Path
+from typing import Optional
 import requests
 
 
@@ -40,8 +41,8 @@ class HostsInstaller:
     
     def __init__(
         self,
-        repo_url: str | None = None,
-        hosts_file_path: str | None = None
+        repo_url: Optional[str] = None,
+        hosts_file_path: Optional[str] = None
     ) -> None:
         """初始化安装器
         
@@ -292,7 +293,7 @@ class HostsInstaller:
         except Exception as e:
             self.logger.warning(f"DNS刷新失败: {e}")
     
-    def install(self, repo_url: str | None = None) -> None:
+    def install(self, repo_url: Optional[str] = None) -> None:
         """执行安装流程
         
         Args:
@@ -362,7 +363,7 @@ def main():
         installer = HostsInstaller(repo_url=repo_url)
         installer.install()
     except HostsInstallError as e:
-        print(f"\n❌ 错误: {e}")
+        print(f"\n[错误] {e}")
         return 1
     except KeyboardInterrupt:
         print("\n\n用户中断操作")

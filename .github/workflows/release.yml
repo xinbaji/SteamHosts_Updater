@@ -31,10 +31,10 @@ jobs:
             binary_name: steam_hosts_updater_windows.exe
     
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v6
     
     - name: 设置Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v6
       with:
         python-version: ${{ matrix.python-version }}
     
@@ -67,10 +67,10 @@ jobs:
     if: contains(github.event.head_commit.message, 'V') || github.event_name == 'push'
     
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v6
     
     - name: 下载所有产物
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v8
       with:
         path: artifacts
     
@@ -90,7 +90,7 @@ jobs:
         echo "Release版本: $VERSION"
     
     - name: 创建Release
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v2
       with:
         tag_name: ${{ steps.get_version.outputs.version }}
         name: Steam Hosts Updater ${{ steps.get_version.outputs.version }}

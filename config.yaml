@@ -11,6 +11,11 @@ steam_domains:
   - steamvideo-a.akamaihd.net
   - help.steampowered.com
   - support.steampowered.com
+  - steamgames.com
+  - steamusercontent.com
+  - steamcontent.com
+  - steamstatic.com
+  - akamaihd.net
 
 # DNS服务器配置
 dns:
