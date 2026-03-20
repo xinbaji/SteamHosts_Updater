@@ -16,10 +16,13 @@
 import logging
 import socket
 import yaml
-import sys
+import urllib.request
+import urllib.error
+import json
+import time
 from pathlib import Path
 from datetime import datetime
-from typing import Any, Optional
+from typing import Any, Optional, List
 
 
 def setup_logging(log_to_file=False):
@@ -60,6 +63,115 @@ def setup_logging(log_to_file=False):
 class DnsQueryError(Exception):
     """DNS查询异常类"""
     pass
+
+
+def query_dns_api(domain: str, dns_server: str = 'https://dns.google/resolve') -> List[str]:
+    """使用Google DNS API查询域名IP地址
+
+    Args:
+        domain: 要查询的域名
+        dns_server: DNS API地址,默认Google DNS
+
+    Returns:
+        IP地址列表
+    """
+    try:
+        url = f"{dns_server}?name={domain}&type=A"
+        request = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+        with urllib.request.urlopen(request, timeout=10) as response:
+            data = json.loads(response.read().decode('utf-8'))
+
+            if data.get('Status') != 0:
+                raise DnsQueryError(f"DNS查询失败: {data.get('Status')}")
+
+            answers = data.get('Answer', [])
+            if not answers:
+                raise DnsQueryError(f"未找到域名 {domain} 的DNS记录")
+
+            ips = []
+            for answer in answers:
+                ip = answer.get('data')
+                if ip:
+                    ips.append(ip)
+
+            if not ips:
+                raise DnsQueryError(f"未找到域名 {domain} 的IP地址")
+
+            return ips
+
+    except urllib.error.URLError as e:
+        raise DnsQueryError(f"网络请求失败: {e}")
+    except json.JSONDecodeError as e:
+        raise DnsQueryError(f"JSON解析失败: {e}")
+
+
+def test_ip_speed(ip: str, port: int = 80, timeout: int = 5) -> float:
+    """测试IP连接速度
+
+    Args:
+        ip: IP地址
+        port: 端口号
+        timeout: 超时时间(秒)
+
+    Returns:
+        连接耗时(秒)
+    """
+    try:
+        start_time = time.time()
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.settimeout(timeout)
+        result = sock.connect_ex((ip, port))
+        sock.close()
+
+        if result == 0:
+            return time.time() - start_time
+        else:
+            return float('inf')  # 连接失败
+    except socket.error:
+        return float('inf')  # 连接异常
+
+
+def select_fastest_ip(ips: List[str], logger: logging.Logger, max_test: int = 3) -> str:
+    """从多个IP中选择连接最快的一个
+
+    Args:
+        ips: IP地址列表
+        logger: 日志记录器
+        max_test: 每个IP测试的最大次数
+
+    Returns:
+        最快的IP地址
+    """
+    if len(ips) == 1:
+        return ips[0]
+
+    logger.info(f"开始测速,共 {len(ips)} 个IP地址")
+
+    ip_speeds = []
+    for ip in ips:
+        speeds = []
+        for i in range(max_test):
+            speed = test_ip_speed(ip)
+            if speed != float('inf'):
+                speeds.append(speed)
+
+        if speeds:
+            avg_speed = sum(speeds) / len(speeds)
+            ip_speeds.append((ip, avg_speed))
+            logger.info(f"  {ip}: 平均 {avg_speed:.3f}秒")
+        else:
+            ip_speeds.append((ip, float('inf')))
+            logger.info(f"  {ip}: 连接失败")
+
+    # 选择平均速度最快的IP
+    ip_speeds.sort(key=lambda x: x[1])
+    fastest_ip = ip_speeds[0][0]
+
+    if ip_speeds[0][1] == float('inf'):
+        raise DnsQueryError("所有IP地址都无法连接")
+
+    logger.info(f"选择最快IP: {fastest_ip}")
+    return fastest_ip
 
 
 class HostsWriter:
@@ -264,7 +376,8 @@ class HostsWriter:
         content += "\n".join(hosts_entries)
         content += """\n# ============================================
 # Steam Hosts结束
-# ============================================\n"""
+# ============================================
+\n"""
         
         # 写入文件
         try:

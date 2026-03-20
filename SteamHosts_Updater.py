@@ -11,9 +11,13 @@ import subprocess
 import shutil
 import sys
 import re
+import urllib.request
+import urllib.error
+import json
+import time
 from pathlib import Path
 from datetime import datetime
-from typing import cast
+from typing import cast, Any, List
 
 
 def safe_print(msg):
@@ -99,6 +103,122 @@ class HostsInstallError(Exception):
     pass
 
 
+def query_dns_api(domain: str, dns_server: str = 'https://dns.google/resolve') -> List[str]:
+    """使用Google DNS API查询域名IP地址
+
+    Args:
+        domain: 要查询的域名
+        dns_server: DNS API地址,默认Google DNS
+
+    Returns:
+        IP地址列表
+    """
+    try:
+        url = f"{dns_server}?name={domain}&type=A"
+        request = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+        with urllib.request.urlopen(request, timeout=10) as response:
+            data = json.loads(response.read().decode('utf-8'))
+
+            if data.get('Status') != 0:
+                raise DnsQueryError(f"DNS查询失败: {data.get('Status')}")
+
+            answers = data.get('Answer', [])
+            if not answers:
+                raise DnsQueryError(f"未找到域名 {domain} 的DNS记录")
+
+            ips = []
+            for answer in answers:
+                ip = answer.get('data')
+                if ip:
+                    ips.append(ip)
+
+            if not ips:
+                raise DnsQueryError(f"未找到域名 {domain} 的IP地址")
+
+            logger.info("查询成功: {} -> {}".format(domain, ', '.join(ips)))
+            return ips
+
+    except urllib.error.URLError as e:
+        raise DnsQueryError(f"网络请求失败: {e}")
+    except json.JSONDecodeError as e:
+        raise DnsQueryError(f"JSON解析失败: {e}")
+
+
+def test_ip_speed(ip: str, port: int = 80, timeout: int = 5) -> float:
+    """测试IP连接速度
+
+    Args:
+        ip: IP地址
+        port: 端口号
+        timeout: 超时时间(秒)
+
+    Returns:
+        连接耗时(秒)
+    """
+    try:
+        start_time = time.time()
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.settimeout(timeout)
+        result = sock.connect_ex((ip, port))
+        sock.close()
+
+        if result == 0:
+            return time.time() - start_time
+        else:
+            return float('inf')  # 连接失败
+    except socket.error:
+        return float('inf')  # 连接异常
+
+
+def select_fastest_ip(ips: List[str], max_test: int = 3) -> str:
+    """从多个IP中选择连接最快的一个
+
+    Args:
+        ips: IP地址列表
+        max_test: 每个IP测试的最大次数
+
+    Returns:
+        最快的IP地址
+    """
+    if len(ips) == 1:
+        return ips[0]
+
+    logger.info("开始测速,共 {} 个IP地址".format(len(ips)))
+
+    ip_speeds = []
+    for ip in ips:
+        speeds = []
+        for i in range(max_test):
+            speed = test_ip_speed(ip)
+            if speed != float('inf'):
+                speeds.append(speed)
+
+        if speeds:
+            avg_speed = sum(speeds) / len(speeds)
+            ip_speeds.append((ip, avg_speed))
+            logger.info("  {}: 平均 {:.3f}秒".format(ip, avg_speed))
+        else:
+            ip_speeds.append((ip, float('inf')))
+            logger.info("  {}: 连接失败".format(ip))
+
+    # 选择平均速度最快的IP
+    ip_speeds.sort(key=lambda x: x[1])
+    fastest_ip = ip_speeds[0][0]
+
+    if ip_speeds[0][1] == float('inf'):
+        raise DnsQueryError("所有IP地址都无法连接")
+
+    logger.info("选择最快IP: {}".format(fastest_ip))
+    return fastest_ip
+
+
+def query_dns(domain, dns_server='8.8.8.8', timeout=5):
+    """查询域名IP地址(已废弃,使用query_dns_api替代)"""
+    ip = query_dns_api(domain)[0]
+    logger.info("查询成功: {} -> {}".format(domain, ip))
+    return ip
+
+
 def get_hosts_path():
     """获取系统hosts文件路径"""
     system = platform.system()
@@ -125,8 +245,16 @@ def query_all_domains(domains):
     entries = []
     for domain in domains:
         try:
-            ip = query_dns(domain)
-            entries.append("{}\t{}".format(ip, domain))
+            # 使用Google DNS API查询所有IP
+            ips = query_dns_api(domain)
+
+            # 如果有多个IP,进行测速选择最快的
+            if len(ips) > 1:
+                fastest_ip = select_fastest_ip(ips)
+            else:
+                fastest_ip = ips[0]
+
+            entries.append("{}\t{}".format(fastest_ip, domain))
         except DnsQueryError as e:
             logger.error(str(e))
     return entries
