@@ -23,6 +23,7 @@ import time
 from pathlib import Path
 from datetime import datetime
 from typing import Any, Optional, List
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 
 def setup_logging(log_to_file=False):
@@ -131,8 +132,33 @@ def test_ip_speed(ip: str, port: int = 80, timeout: int = 5) -> float:
         return float('inf')  # 连接异常
 
 
+def test_ip_speed_single(ip: str, port: int = 80, timeout: int = 5, max_test: int = 3) -> tuple[str, float]:
+    """测试单个IP的平均连接速度（用于多线程）
+
+    Args:
+        ip: IP地址
+        port: 端口号
+        timeout: 超时时间(秒)
+        max_test: 测试次数
+
+    Returns:
+        (ip, 平均速度) 元组
+    """
+    speeds = []
+    for i in range(max_test):
+        speed = test_ip_speed(ip, port, timeout)
+        if speed != float('inf'):
+            speeds.append(speed)
+
+    if speeds:
+        avg_speed = sum(speeds) / len(speeds)
+        return (ip, avg_speed)
+    else:
+        return (ip, float('inf'))
+
+
 def select_fastest_ip(ips: List[str], logger: logging.Logger, max_test: int = 3) -> str:
-    """从多个IP中选择连接最快的一个
+    """从多个IP中选择连接最快的一个（多线程版本）
 
     Args:
         ips: IP地址列表
@@ -145,23 +171,27 @@ def select_fastest_ip(ips: List[str], logger: logging.Logger, max_test: int = 3)
     if len(ips) == 1:
         return ips[0]
 
-    logger.info(f"开始测速,共 {len(ips)} 个IP地址")
+    logger.info(f"开始多线程测速,共 {len(ips)} 个IP地址")
 
     ip_speeds = []
-    for ip in ips:
-        speeds = []
-        for i in range(max_test):
-            speed = test_ip_speed(ip)
-            if speed != float('inf'):
-                speeds.append(speed)
-
-        if speeds:
-            avg_speed = sum(speeds) / len(speeds)
+    
+    # 使用线程池对每个IP并行测速
+    with ThreadPoolExecutor(max_workers=len(ips)) as executor:
+        # 提交所有IP的测速任务
+        future_to_ip = {
+            executor.submit(test_ip_speed_single, ip, 80, 5, max_test): ip 
+            for ip in ips
+        }
+        
+        # 收集结果
+        for future in as_completed(future_to_ip):
+            ip, avg_speed = future.result()
             ip_speeds.append((ip, avg_speed))
-            logger.info(f"  {ip}: 平均 {avg_speed:.3f}秒")
-        else:
-            ip_speeds.append((ip, float('inf')))
-            logger.info(f"  {ip}: 连接失败")
+            
+            if avg_speed == float('inf'):
+                logger.info(f"  {ip}: 连接失败")
+            else:
+                logger.info(f"  {ip}: 平均 {avg_speed:.3f}秒")
 
     # 选择平均速度最快的IP
     ip_speeds.sort(key=lambda x: x[1])
