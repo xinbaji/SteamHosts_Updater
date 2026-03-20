@@ -198,6 +198,7 @@ jobs:
         git config --local user.name "github-actions[bot]"
         git add hosts README.md
         git diff --staged --quiet || git commit -m "🔄 Daily Update: ${{ steps.time.outputs.time }}"
+        git pull --rebase origin main
         git push
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
