@@ -16,7 +16,7 @@
 
 ### 方法1: 使用可执行文件（推荐）
 
-下载最新Release中的可执行文件：
+下载最新Release中的可执行文件 ：
 - Windows: `steam_hosts_updater_windows.exe`
 - macOS: `steam_hosts_updater_macos`
 - Linux: `steam_hosts_updater_ubuntu`
