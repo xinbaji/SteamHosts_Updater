@@ -16,7 +16,7 @@
 
 ### 方法1: 使用可执行文件（推荐）
 
-下载最新Release中的可执行文件 ：
+下载最新Release中的可执行文件：
 - Windows: `steam_hosts_updater_windows.exe`
 - macOS: `steam_hosts_updater_macos`
 - Linux: `steam_hosts_updater_ubuntu`
@@ -72,25 +72,25 @@ python SteamHosts_Updater.py -i
 
 ## 当前Hosts内容
 
-**最后更新时间:** 2026-03-20 01:39:29
+**最后更新时间:** 2026-03-20 01:46:27
 
 ```hosts
-23.45.137.115	store.steampowered.com
-104.68.104.163	steamcommunity.com
-23.59.200.146	api.steampowered.com
-23.214.95.196	steamuserimages-a.akamaihd.net
-23.67.33.209	steamcdn-a.akamaihd.net
-23.192.228.79	steamcommunity-a.akamaihd.net
-23.214.95.201	steamstore-a.akamaihd.net
-23.212.62.91	steambroadcast.akamaized.net
-23.212.62.80	steamvideo-a.akamaihd.net
-23.59.200.146	help.steampowered.com
+23.62.177.63	store.steampowered.com
+23.222.161.105	steamcommunity.com
+23.222.161.105	api.steampowered.com
+23.56.109.231	steamuserimages-a.akamaihd.net
+23.56.109.199	steamcdn-a.akamaihd.net
+23.56.109.236	steamcommunity-a.akamaihd.net
+23.56.109.229	steamstore-a.akamaihd.net
+23.217.118.139	steambroadcast.akamaized.net
+23.217.118.200	steamvideo-a.akamaihd.net
+23.222.161.105	help.steampowered.com
 172.234.232.226	support.steampowered.com
-104.68.112.116	steamgames.com
-23.192.228.72	store.akamai.steamstatic.com
-23.214.95.196	cdn.akamai.steamstatic.com
-104.68.112.116	steam-chat.com
-23.214.95.203	community.akamai.steamstatic.com
+23.40.174.97	steamgames.com
+23.56.109.236	store.akamai.steamstatic.com
+23.56.109.231	cdn.akamai.steamstatic.com
+23.40.174.97	steam-chat.com
+23.56.109.234	community.akamai.steamstatic.com
 ```
 
 *完整内容请查看 [hosts](hosts) 文件*
