@@ -15,7 +15,7 @@
 
 ## 快速开始
 
-### 使用可执行文件（推荐）
+### 方法1: 使用可执行文件（推荐）
 
 下载最新Release中的可执行文件：
 - Windows: `SteamHosts_Updater_standalone_windows_V*.exe`
@@ -39,8 +39,6 @@ SteamHosts_Updater_standalone_windows.exe --output hosts
 
 # 3. 生成日志文件
 SteamHosts_Updater_standalone_windows.exe --log
-# 或
-SteamHosts_Updater_standalone_windows.exe -l
 
 # 4. 生成配置文件模板
 SteamHosts_Updater_standalone_windows.exe --init-config
@@ -49,7 +47,7 @@ SteamHosts_Updater_standalone_windows.exe --init-config
 SteamHosts_Updater_standalone_windows.exe --help
 ```
 
-### 使用Python脚本
+### 方法2: 使用Python脚本
 
 ```bash
 # 安装依赖
@@ -64,8 +62,6 @@ sudo python SteamHosts_Updater.py
 
 # 仅生成hosts文件（不安装）
 python SteamHosts_Updater.py -o hosts
-# 或
-python SteamHosts_Updater.py --output hosts
 
 # 生成日志文件
 python SteamHosts_Updater.py --log
@@ -132,25 +128,25 @@ python query_dns.py
 
 ## 当前Hosts内容
 
-**最后更新时间:** 2026-03-20 01:39:29
+**最后更新时间:** 2026-03-21 01:29:15
 
 ```hosts
-23.45.137.115	store.steampowered.com
-104.68.104.163	steamcommunity.com
-23.59.200.146	api.steampowered.com
-23.214.95.196	steamuserimages-a.akamaihd.net
-23.67.33.209	steamcdn-a.akamaihd.net
-23.192.228.79	steamcommunity-a.akamaihd.net
-23.214.95.201	steamstore-a.akamaihd.net
-23.212.62.91	steambroadcast.akamaized.net
-23.212.62.80	steamvideo-a.akamaihd.net
-23.59.200.146	help.steampowered.com
+23.34.125.198	store.steampowered.com
+23.54.184.97	steamcommunity.com
+23.214.233.226	api.steampowered.com
+23.54.127.118	steamuserimages-a.akamaihd.net
+23.199.55.40	steamcdn-a.akamaihd.net
+23.55.176.237	steamcommunity-a.akamaihd.net
+23.55.176.241	steamstore-a.akamaihd.net
+23.218.218.72	steambroadcast.akamaized.net
+23.218.217.22	steamvideo-a.akamaihd.net
+23.214.233.226	help.steampowered.com
 172.234.232.226	support.steampowered.com
-104.68.112.116	steamgames.com
-23.192.228.72	store.akamai.steamstatic.com
-23.214.95.196	cdn.akamai.steamstatic.com
-104.68.112.116	steam-chat.com
-23.214.95.203	community.akamai.steamstatic.com
+23.213.69.74	steamgames.com
+23.55.176.234	store.akamai.steamstatic.com
+23.221.227.167	cdn.akamai.steamstatic.com
+23.213.69.74	steam-chat.com
+23.55.176.237	community.akamai.steamstatic.com
 ```
 
 *完整内容请查看 [hosts](hosts) 文件*
@@ -171,7 +167,6 @@ python query_dns.py
 ├── install_hosts.py         # 远程安装模块（搁置）
 ├── test_all.py              # 测试脚本
 ├── requirements.txt         # Python依赖
-├── test_all.py             # 综合测试脚本
 ├── .github/
 │   └── workflows/
 │       ├── ci.yml           # CI工作流
@@ -179,14 +174,6 @@ python query_dns.py
 │       └── daily_update.yml # 每日更新工作流
 └── README.md
 ```
-
-## 模块说明
-
-| 模块 | 用途 | 特点 |
-|------|------|------|
-| `SteamHosts_Updater.py` | 主程序，推荐使用 | 直接安装到系统，支持配置，打包为单文件可执行程序 |
-| `query_dns.py` | 独立查询模块 | 只生成hosts文件，不安装，适合CI/CD和调试 |
-| `install_hosts.py` | 远程安装模块 | 功能暂时搁置，等待远程仓库接口建立 |
 
 ## 故障排除
 
@@ -207,3 +194,4 @@ python query_dns.py
 ## 许可证
 
 MIT License
+
