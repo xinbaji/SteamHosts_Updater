@@ -1,24 +1,24 @@
 # ============================================
 # Steam Hosts - 由程序自动生成
-# 生成时间: 2026-05-05 02:22:44
+# 生成时间: 2026-05-06 02:26:33
 # DNS服务器: 8.8.8.8
 # ============================================
-23.48.9.171	store.steampowered.com
-23.214.233.226	steamcommunity.com
-23.214.233.226	api.steampowered.com
-2.18.67.70	steamuserimages-a.akamaihd.net
-23.215.0.145	steamcdn-a.akamaihd.net
-23.46.15.11	steamcommunity-a.akamaihd.net
-23.46.15.32	steamstore-a.akamaihd.net
-2.18.67.84	steambroadcast.akamaized.net
-23.215.0.37	steamvideo-a.akamaihd.net
-23.214.233.226	help.steampowered.com
+184.31.113.220	store.steampowered.com
+23.223.170.105	steamcommunity.com
+23.223.170.105	api.steampowered.com
+23.33.29.10	steamuserimages-a.akamaihd.net
+23.220.246.175	steamcdn-a.akamaihd.net
+23.33.29.11	steamcommunity-a.akamaihd.net
+23.33.29.21	steamstore-a.akamaihd.net
+23.209.94.210	steambroadcast.akamaized.net
+23.200.156.137	steamvideo-a.akamaihd.net
+23.223.170.105	help.steampowered.com
 172.234.232.226	support.steampowered.com
-23.213.69.74	steamgames.com
-23.46.15.32	store.akamai.steamstatic.com
-2.18.67.94	cdn.akamai.steamstatic.com
-23.213.69.74	steam-chat.com
-2.18.67.91	community.akamai.steamstatic.com
+23.215.125.147	steamgames.com
+23.33.29.17	store.akamai.steamstatic.com
+23.33.29.19	cdn.akamai.steamstatic.com
+23.215.125.147	steam-chat.com
+23.33.29.11	community.akamai.steamstatic.com
 # ============================================
 # Steam Hosts结束
 # ============================================
