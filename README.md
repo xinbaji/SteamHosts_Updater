@@ -128,25 +128,25 @@ python query_dns.py
 
 ## 当前Hosts内容
 
-**最后更新时间:** 2026-05-08 02:35:42
+**最后更新时间:** 2026-05-09 02:28:50
 
 ```hosts
-23.48.9.171	store.steampowered.com
-184.27.10.105	steamcommunity.com
-184.27.10.105	api.steampowered.com
-23.215.0.171	steamuserimages-a.akamaihd.net
-23.215.0.145	steamcdn-a.akamaihd.net
-23.215.0.174	steamcommunity-a.akamaihd.net
-23.215.0.171	steamstore-a.akamaihd.net
-23.53.35.240	steambroadcast.akamaized.net
-23.215.0.37	steamvideo-a.akamaihd.net
-23.214.233.226	help.steampowered.com
+23.14.141.208	store.steampowered.com
+23.223.170.105	steamcommunity.com
+23.223.170.105	api.steampowered.com
+23.33.29.81	steamuserimages-a.akamaihd.net
+23.54.76.44	steamcdn-a.akamaihd.net
+23.33.29.88	steamcommunity-a.akamaihd.net
+23.33.29.72	steamstore-a.akamaihd.net
+23.47.52.55	steambroadcast.akamaized.net
+184.25.119.21	steamvideo-a.akamaihd.net
+23.223.170.105	help.steampowered.com
 172.234.232.226	support.steampowered.com
-2.23.141.145	steamgames.com
-23.215.0.165	store.akamai.steamstatic.com
-23.215.0.172	cdn.akamai.steamstatic.com
-2.23.141.145	steam-chat.com
-23.215.0.174	community.akamai.steamstatic.com
+23.215.125.147	steamgames.com
+23.33.29.72	store.akamai.steamstatic.com
+23.33.29.70	cdn.akamai.steamstatic.com
+23.215.125.147	steam-chat.com
+23.33.29.88	community.akamai.steamstatic.com
 ```
 
 *完整内容请查看 [hosts](hosts) 文件*
